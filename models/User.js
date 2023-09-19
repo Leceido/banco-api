@@ -11,7 +11,7 @@ const User = new Schema({
         required: true
     },
     password: {
-        type: Number,
+        type: String,
         required: true
     },
     balance: {
