@@ -12,12 +12,13 @@ router.get('/', (req, res) => {
     res.status(400).send({message: "Why are you here?"})
 })
 
-router.get('/home', login, (req, res) => {
-    User.findOne({cpf: req.user.cpf}).then((user) => {
+router.get('/home', login, async (req, res) => {
+    try {
+        const user = await User.findOne({cpf: req.user.cpf})
         res.status(200).send({user: user})
-    }).catch((err) => {
+    } catch (error) {
         res.status(500).send({message: "internal server error"})
-    })
+    }
 })
 
 router.post('/signup', async (req, res) => {
