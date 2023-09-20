@@ -9,13 +9,125 @@ const bcrypt = require('bcrypt')
 const login = require('../helpers/login')
 
 router.get('/', (req, res) => {
-    res.status(400).send({message: "Why are you here?"})
+    res.status(404).send({message: "Why are you here?"})
 })
 
 router.get('/home', login, async (req, res) => {
     try {
         const user = await User.findOne({cpf: req.user.cpf})
-        res.status(200).send({user: user})
+        res.status(200).send({
+            user: {
+                cpf: user.cpf,
+                name: user.name,
+                balance: user.balance
+            }
+        })
+    } catch (error) {
+        res.status(500).send({message: "internal server error"})
+    }
+})
+
+router.patch('/deposit', login, async (req, res) => {
+    try {
+        const user = await User.findOne({cpf: req.user.cpf})
+
+        user.balance += req.body.value
+
+        await user.save()
+        res.status(200).send({
+            message: "deposit completed",
+            user: {
+                cpf: user.cpf,
+                name: user.name,
+                balance: user.balance
+            }
+        })
+    } catch (error) {
+        res.status(500).send({message: "internal server error"})
+    }
+})
+
+router.patch('/withdraw', login, async (req, res) => {
+    try {
+        const user = await User.findOne({cpf: req.user.cpf})
+
+        if(user.balance < req.body.value) {
+            return res.status(401).send({message: "insufficient funds!"})
+        }
+
+        user.balance -= req.body.value
+
+        await user.save()
+        res.status(200).send({
+            message: "withdraw completed",
+            user: {
+                cpf: user.cpf,
+                name: user.name,
+                balance: user.balance
+            }
+        })
+    } catch (error) {
+        res.status(500).send({message: "internal server error"})
+    }
+})
+
+router.patch('/transfer', login, async (req, res) => {
+    try {
+        const user = await User.findOne({cpf: req.user.cpf})
+        const beneficiary = await User.findOne({cpf: req.body.beneficiary_cpf})
+
+        if (user.cpf === beneficiary.cpf) {
+            return res.status(401).send({message: "invalid beneficiary"})
+        }
+
+        if(user.balance < req.body.value) {
+            return res.status(401).send({message: "insufficient funds"})
+        }
+
+        user.balance -= req.body.value
+        beneficiary.balance += req.body.value
+
+        await user.save()
+        await beneficiary.save()
+        res.status(200).send({
+            message: "transfer completed",
+            user: {
+                cpf: user.cpf,
+                name: user.name,
+                balance: user.balance
+            }
+        })
+    } catch (error) {
+        res.status(500).send({message: "internal server error"})
+    }
+})
+
+router.patch('/pay', login, async (req, res) => {
+    try {
+        const user = await User.findOne({cpf: req.user.cpf})
+        const beneficiary = await User.findOne({cpf: "29238096000102"})
+
+        if (user.cpf === beneficiary.cpf) {
+            return res.status(401).send({message: "invalid beneficiary"})
+        }
+
+        if(user.balance < req.body.value) {
+            return res.status(401).send({message: "insufficient funds"})
+        }
+
+        user.balance -= req.body.value
+        beneficiary.balance += req.body.value
+
+        await user.save()
+        await beneficiary.save()
+        res.status(200).send({
+            message: "payment completed",
+            user: {
+                cpf: user.cpf,
+                name: user.name,
+                balance: user.balance
+            }
+        })
     } catch (error) {
         res.status(500).send({message: "internal server error"})
     }
@@ -24,15 +136,15 @@ router.get('/home', login, async (req, res) => {
 router.post('/signup', async (req, res) => {
     try {
         if (!validarCPF(req.body.cpf)) {
-            return res.status(409).send({error: "invalid cpf"})
+            return res.status(401).send({error: "invalid cpf"})
         }
         const password = req.body.password
         const user = await User.findOne({cpf: req.body.cpf})
 
         if(user) {
-            return res.status(409).send({error: "this user is alredy registered"})
+            return res.status(401).send({error: "this user is alredy registered"})
         } else if (isNaN(password)) {
-            return res.status(409).send({error: "invalid password"});
+            return res.status(401).send({error: "invalid password"});
         } else {
             Stringpassword = password.toString()
 
@@ -71,7 +183,7 @@ router.post('/signup', async (req, res) => {
 router.post('/signin', (req, res) => {
     User.findOne({cpf: req.body.cpf}).then((user) => {
         if(!user) {
-            return res.status(401).send({message: "User is not found"})
+            return res.status(400).send({message: "User is not found"})
         }
         bcrypt.compare(req.body.password, user.password, (err, result) => {
             if(result) {
