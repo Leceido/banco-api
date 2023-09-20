@@ -3,7 +3,10 @@ const mongoose = require('mongoose')
 const router = express.Router()
 require('../models/User')
 const User = mongoose.model('users')
+require('../models/Statement')
+const Statement = mongoose.model('statements')
 const { validarCPF } = require('../helpers/avaibleCpf')
+const { validarCNPJ } = require('../helpers/avaibleCnpj')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const login = require('../helpers/login')
@@ -31,7 +34,16 @@ router.patch('/deposit', login, async (req, res) => {
     try {
         const user = await User.findOne({cpf: req.user.cpf})
 
+        const newTransaction = new Statement({
+            payer: "deposit",
+            beneficiary: user.cpf,
+            amount: req.body.value
+        })
+
+        newTransaction.save()
+
         user.balance += req.body.value
+        user.statement.push(newTransaction)
 
         await user.save()
         res.status(200).send({
@@ -133,10 +145,31 @@ router.patch('/pay', login, async (req, res) => {
     }
 })
 
+router.get('/statement', login, async (req, res) => {
+    try {
+        const user = await User.findOne({ cpf: req.user.cpf }).populate('statement');
+
+        const statements = user.statement.map(statement => ({
+            transaction: {
+                payer: statement.payer,
+                beneficiary: statement.beneficiary,
+                amount: statement.amount,
+                date: statement.date
+            }
+        }));
+
+        console.log(user.statement);
+
+        return res.status(200).send({ statements });
+    } catch (error) {
+        res.status(500).send({ message: "internal server error" });
+    }
+});
+
 router.post('/signup', async (req, res) => {
     try {
-        if (!validarCPF(req.body.cpf)) {
-            return res.status(401).send({error: "invalid cpf"})
+        if (!validarCPF(req.body.cpf) && !validarCNPJ(req.body.cpf)) {
+            return res.status(401).send({error: "invalid CPF or CNPJ"})
         }
         const password = req.body.password
         const user = await User.findOne({cpf: req.body.cpf})

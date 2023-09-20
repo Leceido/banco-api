@@ -18,7 +18,13 @@ const User = new Schema({
         type: Number,
         default: 0,
         required: true
-    }
+    },
+    statement: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "statements"
+        }
+    ]
 })
 
 mongoose.model('users', User)
