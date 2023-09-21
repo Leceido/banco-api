@@ -42,8 +42,9 @@ router.patch('/deposit', login, async (req, res) => {
 
         newTransaction.save()
 
-        user.balance += req.body.value
         user.statement.push(newTransaction)
+        user.balance += req.body.value
+        
 
         await user.save()
         res.status(200).send({
@@ -67,6 +68,15 @@ router.patch('/withdraw', login, async (req, res) => {
             return res.status(401).send({message: "insufficient funds!"})
         }
 
+        const newTransaction = new Statement({
+            payer: user.cpf,
+            beneficiary: "withdraw",
+            amount: req.body.value
+        })
+
+        newTransaction.save()
+
+        user.statement.push(newTransaction)
         user.balance -= req.body.value
 
         await user.save()
@@ -96,6 +106,16 @@ router.patch('/transfer', login, async (req, res) => {
             return res.status(401).send({message: "insufficient funds"})
         }
 
+        const newTransaction = new Statement({
+            payer: user.cpf,
+            beneficiary: beneficiary.cpf,
+            amount: req.body.value
+        })
+
+        newTransaction.save()
+
+        user.statement.push(newTransaction)
+        beneficiary.statement.push(newTransaction)
         user.balance -= req.body.value
         beneficiary.balance += req.body.value
 
@@ -127,6 +147,16 @@ router.patch('/pay', login, async (req, res) => {
             return res.status(401).send({message: "insufficient funds"})
         }
 
+        const newTransaction = new Statement({
+            payer: user.cpf,
+            beneficiary: "BANK",
+            amount: req.body.value
+        })
+
+        newTransaction.save()
+
+        user.statement.push(newTransaction)
+
         user.balance -= req.body.value
         beneficiary.balance += req.body.value
 
@@ -157,8 +187,6 @@ router.get('/statement', login, async (req, res) => {
                 date: statement.date
             }
         }));
-
-        console.log(user.statement);
 
         return res.status(200).send({ statements });
     } catch (error) {
