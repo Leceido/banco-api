@@ -8,6 +8,8 @@ const UsersController = require('../routes/controllers/users-controller')
 
 router.get('/home', login, UsersController.getHome)
 
+router.get('/contacts', login, UsersController.getContacts)
+
 router.patch('/deposit', login, UsersController.patchDeposit)
 
 router.patch('/withdraw', login, UsersController.patchWithdraw)

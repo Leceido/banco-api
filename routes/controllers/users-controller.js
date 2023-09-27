@@ -23,6 +23,20 @@ exports.getHome = async (req, res) => {
     }
 }
 
+exports.getContacts = async (req, res) => {
+    try {
+        const users = await User.find({cpf: {$nin: [req.user.cpf, "29238096000102"]}})
+        res.status(200).send({users: users.map(user => {
+            return {
+                name: user.name,
+                cpf: user.cpf
+            }
+        })})
+    } catch (err) {
+        res.status(500).send({message: "internal server error"})
+    }
+}
+
 exports.patchDeposit = async (req, res) => {
     try {
         const user = await User.findOne({cpf: req.user.cpf})
@@ -252,7 +266,8 @@ exports.postSignin = (req, res) => {
                     })
                     return res.status(200).send({
                         message: "User is authenticated",
-                        token: token
+                        token: token,
+                        user: user
                     })
                 } catch (error) {
                     res.status(500).send({messagem: "Internal server error"})
