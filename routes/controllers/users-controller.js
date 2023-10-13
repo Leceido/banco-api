@@ -15,11 +15,25 @@ exports.getHome = async (req, res) => {
             user: {
                 cpf: user.cpf,
                 name: user.name,
-                balance: user.balance
+                balance: user.balance.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'})
             }
         })
     } catch (error) {
         res.status(500).send({message: "internal server error"})
+    }
+}
+
+exports.getUser = async (req, res) => {
+    try {
+        const user = await User.findOne({cpf: req.params.cpf})
+        res.status(200).send({
+            user: {
+                name: user.name,
+                cpf: user.cpf
+            }
+        })
+    } catch (error) {
+        res.status(404).send({message: 'user is not found'})
     }
 }
 
@@ -40,6 +54,10 @@ exports.getContacts = async (req, res) => {
 exports.patchDeposit = async (req, res) => {
     try {
         const user = await User.findOne({cpf: req.user.cpf})
+
+        if (req.body.value <= 0) {
+            return res.status(401).send({message: "invalid value"})
+        }
 
         const newTransaction = new Statement({
             payer: "deposit",
@@ -105,8 +123,12 @@ exports.patchTransfer = async (req, res) => {
         const user = await User.findOne({cpf: req.user.cpf})
         const beneficiary = await User.findOne({cpf: req.body.beneficiary_cpf})
 
+        if(!beneficiary) {
+            return res.status(404).send({message: "invalid beneficiary, not found"})
+        }
+
         if (user.cpf === beneficiary.cpf) {
-            return res.status(401).send({message: "invalid beneficiary"})
+            return res.status(401).send({message: "invalid beneficiary, same person"})
         }
 
         if(user.balance < req.body.value) {
@@ -137,7 +159,7 @@ exports.patchTransfer = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(500).send({message: "internal server error"})
+        res.status(500).send({message: "internal server error", error:error})
     }
 }
 
@@ -190,8 +212,8 @@ exports.getStatement = async (req, res) => {
             transaction: {
                 payer: statement.payer,
                 beneficiary: statement.beneficiary,
-                amount: statement.amount,
-                date: statement.date
+                amount: statement.amount.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'}),
+                date: statement.date.toLocaleString('pt-br',{timezone: 'UTC'})
             }
         }));
 
@@ -267,7 +289,11 @@ exports.postSignin = (req, res) => {
                     return res.status(200).send({
                         message: "User is authenticated",
                         token: token,
-                        user: user
+                        user: {
+                            cpf: user.cpf,
+                            name: user.name,
+                            balance: user.balance
+                        }   
                     })
                 } catch (error) {
                     res.status(500).send({messagem: "Internal server error"})
