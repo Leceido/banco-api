@@ -215,6 +215,7 @@ exports.getStatement = async (req, res) => {
 
         const statements = user.statement.map(statement => ({
             transaction: {
+                id: statement._id,
                 payer: statement.payer,
                 beneficiary: statement.beneficiary,
                 amount: statement.amount.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }),
