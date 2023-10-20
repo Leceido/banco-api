@@ -10,22 +10,22 @@ const bcrypt = require('bcrypt')
 
 exports.getHome = async (req, res) => {
     try {
-        const user = await User.findOne({cpf: req.user.cpf})
+        const user = await User.findOne({ cpf: req.user.cpf })
         res.status(200).send({
             user: {
                 cpf: user.cpf,
                 name: user.name,
-                balance: user.balance.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'})
+                balance: user.balance.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
             }
         })
     } catch (error) {
-        res.status(500).send({message: "internal server error"})
+        res.status(500).send({ message: "internal server error" })
     }
 }
 
 exports.getUser = async (req, res) => {
     try {
-        const user = await User.findOne({cpf: req.params.cpf})
+        const user = await User.findOne({ cpf: req.params.cpf })
         res.status(200).send({
             user: {
                 name: user.name,
@@ -33,30 +33,32 @@ exports.getUser = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(404).send({message: 'user is not found'})
+        res.status(404).send({ message: 'user is not found' })
     }
 }
 
 exports.getContacts = async (req, res) => {
     try {
-        const users = await User.find({cpf: {$nin: [req.user.cpf, "29238096000102"]}})
-        res.status(200).send({users: users.map(user => {
-            return {
-                name: user.name,
-                cpf: user.cpf
-            }
-        })})
+        const users = await User.find({ cpf: { $nin: [req.user.cpf, "29238096000102"] } })
+        res.status(200).send({
+            users: users.map(user => {
+                return {
+                    name: user.name,
+                    cpf: user.cpf
+                }
+            })
+        })
     } catch (err) {
-        res.status(500).send({message: "internal server error"})
+        res.status(500).send({ message: "internal server error" })
     }
 }
 
 exports.patchDeposit = async (req, res) => {
     try {
-        const user = await User.findOne({cpf: req.user.cpf})
+        const user = await User.findOne({ cpf: req.user.cpf })
 
         if (req.body.value <= 0) {
-            return res.status(401).send({message: "invalid value"})
+            return res.status(401).send({ message: "invalid value" })
         }
 
         const newTransaction = new Statement({
@@ -69,7 +71,7 @@ exports.patchDeposit = async (req, res) => {
 
         user.statement.push(newTransaction)
         user.balance += req.body.value
-        
+
 
         await user.save()
         res.status(200).send({
@@ -81,16 +83,16 @@ exports.patchDeposit = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(500).send({message: "internal server error"})
+        res.status(500).send({ message: "internal server error" })
     }
 }
 
 exports.patchWithdraw = async (req, res) => {
     try {
-        const user = await User.findOne({cpf: req.user.cpf})
+        const user = await User.findOne({ cpf: req.user.cpf })
 
-        if(user.balance < req.body.value) {
-            return res.status(401).send({message: "insufficient funds!"})
+        if (user.balance < req.body.value) {
+            return res.status(401).send({ message: "insufficient funds!" })
         }
 
         const newTransaction = new Statement({
@@ -114,25 +116,25 @@ exports.patchWithdraw = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(500).send({message: "internal server error"})
+        res.status(500).send({ message: "internal server error" })
     }
 }
 
 exports.patchTransfer = async (req, res) => {
     try {
-        const user = await User.findOne({cpf: req.user.cpf})
-        const beneficiary = await User.findOne({cpf: req.body.beneficiary_cpf})
+        const user = await User.findOne({ cpf: req.user.cpf })
+        const beneficiary = await User.findOne({ cpf: req.body.beneficiary_cpf })
 
-        if(!beneficiary) {
-            return res.status(404).send({message: "invalid beneficiary, not found"})
+        if (!beneficiary) {
+            return res.status(404).send({ message: "invalid beneficiary, not found" })
         }
 
         if (user.cpf === beneficiary.cpf) {
-            return res.status(401).send({message: "invalid beneficiary, same person"})
+            return res.status(401).send({ message: "invalid beneficiary, same person" })
         }
 
-        if(user.balance < req.body.value) {
-            return res.status(401).send({message: "insufficient funds"})
+        if (user.balance < req.body.value) {
+            return res.status(401).send({ message: "insufficient funds" })
         }
 
         const newTransaction = new Statement({
@@ -159,21 +161,21 @@ exports.patchTransfer = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(500).send({message: "internal server error", error:error})
+        res.status(500).send({ message: "internal server error", error: error })
     }
 }
 
 exports.patchPay = async (req, res) => {
     try {
-        const user = await User.findOne({cpf: req.user.cpf})
-        const beneficiary = await User.findOne({cpf: "29238096000102"})
+        const user = await User.findOne({ cpf: req.user.cpf })
+        const beneficiary = await User.findOne({ cpf: "29238096000102" })
 
         if (user.cpf === beneficiary.cpf) {
-            return res.status(401).send({message: "invalid beneficiary"})
+            return res.status(401).send({ message: "invalid beneficiary" })
         }
 
-        if(user.balance < req.body.value) {
-            return res.status(401).send({message: "insufficient funds"})
+        if (user.balance < req.body.value) {
+            return res.status(401).send({ message: "insufficient funds" })
         }
 
         const newTransaction = new Statement({
@@ -200,20 +202,23 @@ exports.patchPay = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(500).send({message: "internal server error"})
+        res.status(500).send({ message: "internal server error" })
     }
 }
 
 exports.getStatement = async (req, res) => {
     try {
-        const user = await User.findOne({ cpf: req.user.cpf }).populate('statement');
+        const user = await User.findOne({ cpf: req.user.cpf }).populate({
+            path: 'statement',
+            options: { sort: { date: -1 }, limit: 20 }
+        })
 
         const statements = user.statement.map(statement => ({
             transaction: {
                 payer: statement.payer,
                 beneficiary: statement.beneficiary,
-                amount: statement.amount.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'}),
-                date: statement.date.toLocaleString('pt-br',{timezone: 'UTC'})
+                amount: statement.amount.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }),
+                date: statement.date.toLocaleString('pt-br', { timezone: 'UTC' })
             }
         }));
 
@@ -226,15 +231,15 @@ exports.getStatement = async (req, res) => {
 exports.postSignup = async (req, res) => {
     try {
         if (!validarCPF(req.body.cpf) && !validarCNPJ(req.body.cpf)) {
-            return res.status(401).send({error: "invalid CPF or CNPJ"})
+            return res.status(401).send({ error: "invalid CPF or CNPJ" })
         }
         const password = req.body.password
-        const user = await User.findOne({cpf: req.body.cpf})
+        const user = await User.findOne({ cpf: req.body.cpf })
 
-        if(user) {
-            return res.status(401).send({error: "this user is alredy registered"})
+        if (user) {
+            return res.status(401).send({ error: "this user is alredy registered" })
         } else if (isNaN(password)) {
-            return res.status(401).send({error: "invalid password"});
+            return res.status(401).send({ error: "invalid password" });
         } else {
             Stringpassword = password.toString()
 
@@ -246,9 +251,9 @@ exports.postSignup = async (req, res) => {
             })
 
             bcrypt.hash(newUser.password, 10, (errBcrypt, hash) => {
-                if(errBcrypt) {
+                if (errBcrypt) {
                     console.log(errBcrypt);
-                    return res.status(500).send({error: errBcrypt})
+                    return res.status(500).send({ error: errBcrypt })
                 }
 
                 newUser.password = hash
@@ -266,26 +271,26 @@ exports.postSignup = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        res.status(500).send({error: "internal server error"})
+        res.status(500).send({ error: "internal server error" })
     }
 }
 
 exports.postSignin = (req, res) => {
-    User.findOne({cpf: req.body.cpf}).then((user) => {
-        if(!user) {
-            return res.status(400).send({message: "User is not found"})
+    User.findOne({ cpf: req.body.cpf }).then((user) => {
+        if (!user) {
+            return res.status(400).send({ message: "User is not found" })
         }
         bcrypt.compare(req.body.password, user.password, (err, result) => {
-            if(result) {
+            if (result) {
                 try {
                     const token = jwt.sign({
                         cpf: user.cpf,
                         name: user.name
                     },
-                    `${process.env.JWT_KEY}`,
-                    {
-                        expiresIn: "1h"
-                    })
+                        `${process.env.JWT_KEY}`,
+                        {
+                            expiresIn: "1h"
+                        })
                     return res.status(200).send({
                         message: "User is authenticated",
                         token: token,
@@ -293,13 +298,13 @@ exports.postSignin = (req, res) => {
                             cpf: user.cpf,
                             name: user.name,
                             balance: user.balance
-                        }   
+                        }
                     })
                 } catch (error) {
-                    res.status(500).send({messagem: "Internal server error"})
+                    res.status(500).send({ messagem: "Internal server error" })
                 }
             } else {
-                res.status(401).send({messagem: "Auth failed, ivalid user or password"})
+                res.status(401).send({ messagem: "Auth failed, ivalid user or password" })
             }
         })
     })
