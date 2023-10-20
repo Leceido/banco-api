@@ -213,17 +213,17 @@ exports.getStatement = async (req, res) => {
             options: { sort: { date: -1 }, limit: 20 }
         })
 
-        const statements = user.statement.map(statement => ({
-            transaction: {
-                id: statement._id,
-                payer: statement.payer,
-                beneficiary: statement.beneficiary,
-                amount: statement.amount.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }),
-                date: statement.date.toLocaleString('pt-br', { timezone: 'UTC' })
-            }
-        }));
-
-        return res.status(200).send({ statements });
+        res.status(200).send({
+            statements: user.statement.map(statement => {
+                return {
+                    id: statement._id,
+                    payer: statement.payer,
+                    beneficiary: statement.beneficiary,
+                    amount: statement.amount.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }),
+                    date: statement.date.toLocaleString('pt-br', { timezone: 'UTC' })
+                }
+            })
+        })
     } catch (error) {
         res.status(500).send({ message: "internal server error" });
     }
