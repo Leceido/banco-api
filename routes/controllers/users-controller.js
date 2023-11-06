@@ -229,6 +229,35 @@ exports.getStatement = async (req, res) => {
     }
 }
 
+exports.patchChangePassword = async (req, res) => {
+    try {
+        const user = await User.findOne({ cpf: req.body.cpf })
+        const password = req.body.password
+        if (!user) {
+            return res.status(400).send({ message: "User is not found" })
+        }
+        if (isNaN(password)) {
+            return res.status(401).send({ error: "invalid password" });
+        }
+        const stringPassword = password.toString()
+
+        bcrypt.hash(stringPassword, 10, (errBcrypt, hash) => {
+            if (errBcrypt) {
+                console.log(errBcrypt);
+                return res.status(500).send({ error: errBcrypt })
+            }
+
+            user.password = hash
+            user.save()
+
+            res.status(201).send({message: "password changed"})
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ error: "internal server error" })
+    }
+}
+
 exports.postSignup = async (req, res) => {
     try {
         if (!validarCPF(req.body.cpf) && !validarCNPJ(req.body.cpf)) {

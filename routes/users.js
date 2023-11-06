@@ -20,7 +20,9 @@ router.patch('/transfer', login, UsersController.patchTransfer)
 
 router.patch('/pay', login, UsersController.patchPay)
 
-router.get('/statement', login, UsersController.getStatement);
+router.get('/statement', login, UsersController.getStatement)
+
+router.patch('/changepassword', UsersController.patchChangePassword)
 
 router.post('/signup', UsersController.postSignup)
 
