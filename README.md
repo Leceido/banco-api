@@ -32,17 +32,17 @@ banco-api/package.json
 ### Endpoints
 A API oferece os seguintes endpoints:
 
-`GET /users/home`: Retorna as informações do usuario autenticado (nome, cpf, saldo)
-`GET /users/user/:cpf`: Retorna algumas informações de um usuário em especifico passando o cpf como parametro na URL (nome, cpf)
-`GET /users/contacts`: Retorna um array com todos os usuarios cadastrados (nome, cpf)
-`PATCH /users/deposit`: Realiza um deposito para o usuario autenticado
-`PATCH /users/withdraw`: Realiza um saque na conta do usuario autenticado
-`PATCH /users/transfer`: Usuario autenticado realiza uma transferencia para outro usuario
-`PATCH /users/pay`: Usuario autenticado realiza um pagamento para o BANCO
-`GET /users/statement`: Retorna o extrato bancario do usuario autenticado
-`PATCH /users/changepassword`: Realiza a troca da senha de um usuario
-`POST /users/signup`: Cadastrar usuario
-`POST /users/signin`: Autenticar usuario
+- `GET /users/home`: Retorna as informações do usuario autenticado (nome, cpf, saldo)
+- `GET /users/user/:cpf`: Retorna algumas informações de um usuário em especifico passando o cpf como parametro na URL (nome, cpf)
+- `GET /users/contacts`: Retorna um array com todos os usuarios cadastrados (nome, cpf)
+- `PATCH /users/deposit`: Realiza um deposito para o usuario autenticado
+- `PATCH /users/withdraw`: Realiza um saque na conta do usuario autenticado
+- `PATCH /users/transfer`: Usuario autenticado realiza uma transferencia para outro usuario
+- `PATCH /users/pay`: Usuario autenticado realiza um pagamento para o BANCO
+- `GET /users/statement`: Retorna o extrato bancario do usuario autenticado
+- `PATCH /users/changepassword`: Realiza a troca da senha de um usuario
+- `POST /users/signup`: Cadastrar usuario
+- `POST /users/signin`: Autenticar usuario
 
 ### Exemplos de Uso
 Aqui estão alguns exemplos de como utilizar os endpoints da API:
