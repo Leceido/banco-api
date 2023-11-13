@@ -24,9 +24,9 @@ banco-api/package.json
 
 ### Release
 Release: 1.1.0 (Release)
-- Criação da rota para usuarios trocarem a senha
+    - Criação da rota para usuarios trocarem a senha
 Release: 1.0.0 
-- Lançamento do sistema
+    - Lançamento do sistema
 
 ### Endpoints
 A API oferece os seguintes endpoints:
