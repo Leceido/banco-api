@@ -1,6 +1,15 @@
 # Banco API
 Descrição: A API do Banco é uma parte fundamental do meu projeto de banco digital full stack [Banco App](https://github.com/Leceido/banco-app). Esta API é responsável por gerenciar transações financeiras, contas de usuário, autenticação e muito mais. Este README documenta as funcionalidades da API que se encontra hospedada no [Render](https://render.com/).
 
+## Release
+
+### Release: 1.2.0 (Release)
+- Alteração dos retornos da API para pt-br, para padronizar com o front-end da aplicação
+### Release: 1.1.0 (Release)
+- Criação da rota para usuarios trocarem a senha
+### Release: 1.0.0
+- Lançamento do sistema
+
 ## Conteúdo
 - Release
 - Endpoints
@@ -21,15 +30,6 @@ banco-api/package.json
     "nodemon": "^3.0.1"
 },
 ```
-
-## Release
-
-### Release: 1.2.0 (Release)
-- Alteração dos retornos da API para pt-br, para padronizar com o front-end da aplicação
-### Release: 1.1.0 (Release)
-- Criação da rota para usuarios trocarem a senha
-### Release: 1.0.0
-- Lançamento do sistema
 
 ### Endpoints
 A API oferece os seguintes endpoints:
