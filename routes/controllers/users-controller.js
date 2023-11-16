@@ -33,7 +33,7 @@ exports.getUser = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(404).send({ message: 'user is not found' })
+        res.status(404).send({ message: 'Usuario não encotrado' })
     }
 }
 
@@ -58,7 +58,7 @@ exports.patchDeposit = async (req, res) => {
         const user = await User.findOne({ cpf: req.user.cpf })
 
         if (req.body.value <= 0) {
-            return res.status(401).send({ message: "invalid value" })
+            return res.status(401).send({ message: "valor invalido" })
         }
 
         const newTransaction = new Statement({
@@ -75,7 +75,7 @@ exports.patchDeposit = async (req, res) => {
 
         await user.save()
         res.status(200).send({
-            message: "deposit completed",
+            message: "Deposito realizado",
             user: {
                 cpf: user.cpf,
                 name: user.name,
@@ -92,7 +92,7 @@ exports.patchWithdraw = async (req, res) => {
         const user = await User.findOne({ cpf: req.user.cpf })
 
         if (user.balance < req.body.value) {
-            return res.status(401).send({ message: "insufficient funds!" })
+            return res.status(401).send({ message: "Saldo insuficiente" })
         }
 
         const newTransaction = new Statement({
@@ -108,7 +108,7 @@ exports.patchWithdraw = async (req, res) => {
 
         await user.save()
         res.status(200).send({
-            message: "withdraw completed",
+            message: "Saque realizado",
             user: {
                 cpf: user.cpf,
                 name: user.name,
@@ -126,15 +126,15 @@ exports.patchTransfer = async (req, res) => {
         const beneficiary = await User.findOne({ cpf: req.body.beneficiary_cpf })
 
         if (!beneficiary) {
-            return res.status(404).send({ message: "invalid beneficiary, not found" })
+            return res.status(404).send({ message: "Beneficiario invalido" })
         }
 
         if (user.cpf === beneficiary.cpf) {
-            return res.status(401).send({ message: "invalid beneficiary, same person" })
+            return res.status(401).send({ message: "Beneficiario invalido, mesma pessoa" })
         }
 
         if (user.balance < req.body.value) {
-            return res.status(401).send({ message: "insufficient funds" })
+            return res.status(401).send({ message: "Saldo insuficiente" })
         }
 
         const newTransaction = new Statement({
@@ -153,7 +153,7 @@ exports.patchTransfer = async (req, res) => {
         await user.save()
         await beneficiary.save()
         res.status(200).send({
-            message: "transfer completed",
+            message: "Transferencia realizada",
             user: {
                 cpf: user.cpf,
                 name: user.name,
@@ -171,11 +171,11 @@ exports.patchPay = async (req, res) => {
         const beneficiary = await User.findOne({ cpf: "29238096000102" })
 
         if (user.cpf === beneficiary.cpf) {
-            return res.status(401).send({ message: "invalid beneficiary" })
+            return res.status(401).send({ message: "Beneficiario invalido" })
         }
 
         if (user.balance < req.body.value) {
-            return res.status(401).send({ message: "insufficient funds" })
+            return res.status(401).send({ message: "Saldo insuficiente" })
         }
 
         const newTransaction = new Statement({
@@ -194,7 +194,7 @@ exports.patchPay = async (req, res) => {
         await user.save()
         await beneficiary.save()
         res.status(200).send({
-            message: "payment completed",
+            message: "Pagamento Realizado",
             user: {
                 cpf: user.cpf,
                 name: user.name,
@@ -234,10 +234,10 @@ exports.patchChangePassword = async (req, res) => {
         const user = await User.findOne({ cpf: req.body.cpf })
         const password = req.body.password
         if (!user) {
-            return res.status(400).send({ message: "User is not found" })
+            return res.status(400).send({ message: "Usuario não encontrado" })
         }
         if (isNaN(password)) {
-            return res.status(401).send({ error: "invalid password" });
+            return res.status(401).send({ error: "Senha invalida, necessario senha numerica" });
         }
         const stringPassword = password.toString()
 
@@ -250,7 +250,7 @@ exports.patchChangePassword = async (req, res) => {
             user.password = hash
             user.save()
 
-            res.status(201).send({message: "password changed"})
+            res.status(201).send({message: "Senha alterada"})
         })
     } catch (error) {
         console.log(error);
@@ -261,15 +261,15 @@ exports.patchChangePassword = async (req, res) => {
 exports.postSignup = async (req, res) => {
     try {
         if (!validarCPF(req.body.cpf) && !validarCNPJ(req.body.cpf)) {
-            return res.status(401).send({ error: "invalid CPF or CNPJ" })
+            return res.status(401).send({ error: "CPF ou CNPJ invalido" })
         }
         const password = req.body.password
         const user = await User.findOne({ cpf: req.body.cpf })
 
         if (user) {
-            return res.status(401).send({ error: "this user is alredy registered" })
+            return res.status(401).send({ error: "Esse usuario já está cadastrado" })
         } else if (isNaN(password)) {
-            return res.status(401).send({ error: "invalid password" });
+            return res.status(401).send({ error: "Senha invalida, necessario senha numerica" });
         } else {
             Stringpassword = password.toString()
 
@@ -291,7 +291,7 @@ exports.postSignup = async (req, res) => {
                 newUser.save()
 
                 res.status(201).send({
-                    message: "user created!",
+                    message: "Usuario Criado",
                     userCreated: {
                         name: req.body.name,
                         cpf: req.body.cpf
@@ -308,7 +308,7 @@ exports.postSignup = async (req, res) => {
 exports.postSignin = (req, res) => {
     User.findOne({ cpf: req.body.cpf }).then((user) => {
         if (!user) {
-            return res.status(400).send({ message: "User is not found" })
+            return res.status(400).send({ message: "Usuario não encontrado" })
         }
         bcrypt.compare(req.body.password, user.password, (err, result) => {
             if (result) {
@@ -322,7 +322,7 @@ exports.postSignin = (req, res) => {
                             expiresIn: "1h"
                         })
                     return res.status(200).send({
-                        message: "User is authenticated",
+                        message: "Usuario autenticado",
                         token: token,
                         user: {
                             cpf: user.cpf,
@@ -334,7 +334,7 @@ exports.postSignin = (req, res) => {
                     res.status(500).send({ messagem: "Internal server error" })
                 }
             } else {
-                res.status(401).send({ messagem: "Auth failed, ivalid user or password" })
+                res.status(401).send({ messagem: "Autenticação falhou, usuario ou senha incorretos" })
             }
         })
     })
