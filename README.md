@@ -24,6 +24,8 @@ banco-api/package.json
 
 ## Release
 
+### Release: 1.2.0 (Release)
+- Alteração dos retornos da API para pt-br, para padronizar com o front-end da aplicação
 ### Release: 1.1.0 (Release)
 - Criação da rota para usuarios trocarem a senha
 ### Release: 1.0.0
